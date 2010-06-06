@@ -17,17 +17,12 @@
 
 require 'rubygems'
 require 'sinatra'
+require 'heroku'
 
-require 'ci/controllers/server'
-require 'ci/models/build'
+require 'ci/server'
+require 'ci/build'
 
 DataMapper.setup(:default, ENV['DATABASE_URL'] || "sqlite3:///tmp/ci-i18n-development.db")
 DataMapper.auto_upgrade!
 
-targets = %w(
-  http://ci-i18n-client-186.heroku.com
-  http://ci-i18n-client-187.heroku.com
-  http://ci-i18n-client-191.heroku.com
-)
-
-run Ci::Server.new('http://github.com/svenfuchs/i18n', targets)
+run Ci::Server.new('http://github.com/svenfuchs/i18n')

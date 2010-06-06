@@ -1,4 +1,4 @@
 require 'rubygems'
-require 'ci/controllers/client'
+require 'ci/client'
 
 run Ci::Client.new

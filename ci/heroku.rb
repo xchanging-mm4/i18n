@@ -17,6 +17,15 @@ class Heroku
     def client(name, stack = '187')
       new('client', name, stack).setup
     end
+
+    def apps
+      @apps ||= `heroku list`.split("\n").map { |name| name.split(/\s/).first }
+    end
+    
+    def client_urls
+      names = Heroku.apps.select { |name| name =~ /ci-.*-client-/ }
+      names.map do |name| "http://#{name}.heroku.com" }
+    end
   end
 
   attr_reader :type, :name, :version
@@ -28,8 +37,9 @@ class Heroku
   def setup
     create_app unless app_exists?
     add_remote unless remote_exists?
-    branch
+    prepare
     push
+    reset
   end
 
   def app
@@ -41,7 +51,8 @@ class Heroku
   end
 
   def app_exists?
-    apps.include?(app)
+    puts "checking for #{app} ..."
+    Heroku.apps.include?(app)
   end
 
   def remote_exists?
@@ -58,26 +69,21 @@ class Heroku
     `git remote add #{app} git@heroku.com:#{app}.git`
   end
 
-  def push
-    puts "pushing ci-#{type} to #{app} ..."
-    `git push #{app} ci-#{type}:master --force`
-    `git co master`
-    `git branch -D ci-#{type}`
-    `rm -f Gemfile config.ru > /dev/null`
-  end
-
-  def branch
-    puts "setting up ci-#{type} branch ..."
-    `git co -b ci-#{type}`
+  def prepare
     `cp ci/#{type}.ru config.ru`
     `cp ci/Gemfile Gemfile`
     `git add config.ru Gemfile`
     `git commit -m 'ci #{type}'`
   end
 
-  def apps
-    puts "check for #{app} ..."
-    @apps ||= `heroku list`.split("\n").map { |name| name.split(/\s/).first }
+  def push
+    puts "pushing to #{app} ..."
+    `git push #{app} ci:master --force`
+  end
+
+  def reset
+    `rm -f Gemfile config.ru > /dev/null`
+    `git reset ci^`
   end
 
   def remotes

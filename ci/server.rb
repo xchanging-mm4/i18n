@@ -3,11 +3,11 @@ require 'json'
 
 module Ci
   class Server < Sinatra::Application
-    attr_reader :repository, :targets
+    attr_reader :repository, :clients
 
-    def initialize(repository, targets)
+    def initialize(repository)
       @repository = repository
-      @targets    = targets
+      @clients    = Heroku.client_urls
       super()
     end
 
@@ -27,20 +27,20 @@ module Ci
 
       def build_all
         payload = map_from_github(params[:payload])
-        targets.inject({}) do |result, target|
-          result.merge(target => build_remote(target, payload))
+        clients.inject({}) do |result, client|
+          result.merge(client => build_remote(client, payload))
         end
       end
 
-      def build_remote(target, payload)
-        # should probably spawn a process per target here
-        build = `curl -sd payload=#{CGI.escape(payload.to_json)} #{target} 2>&1`
-        finished(target, build)
+      def build_remote(client, payload)
+        # should probably spawn a process per client here
+        build = `curl -sd payload=#{CGI.escape(payload.to_json)} #{client} 2>&1`
+        finished(client, build)
         build
       end
 
-      def finished(target, build)
-        attributes = JSON.parse(build).merge(:target => target, :created_at => Time.now)
+      def finished(client, build)
+        attributes = JSON.parse(build).merge(:client => client, :created_at => Time.now)
         Build.new(attributes).save
       end
 
