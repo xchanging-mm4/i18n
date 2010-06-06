@@ -1,13 +1,13 @@
 source :rubygems
 
-# gems required to run ci client/server
+# gems required to run travis
 gem 'sinatra'
 gem 'bob'
 gem 'data_mapper'
 gem 'data_objects'
 gem 'do_postgres'
 
-# gems required to run the i18n tests
+# gems required to run the your libraries tests
 gem 'activerecord'
 gem 'activesupport'
 gem 'sqlite3-ruby'

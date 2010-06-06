@@ -13,15 +13,16 @@ Bob::SCM::Abstract.class_eval do
   end
 end
 
-module Ci
-  class Client
+module Travis
+  class Runner
     attr_reader :env
     
     def call(env)
       @env = env
       status, output = Bob::Builder.new(payload).build
       body = { :status => status, :output => output, :commit => payload['commit'] }.to_json
-      Rack::Response.new(body, status ? 200 : 400).finish # so, what's the appropriate http way to signal a test failure?
+      # what's an appropriate http status to signal a test failure?
+      Rack::Response.new(body, status ? 200 : 400).finish
     rescue JSON::JSONError
       Rack::Response.new("Unparsable payload", 400).finish
     end

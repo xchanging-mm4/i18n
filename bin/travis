@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+# TODO remove this once this has been released as a gem
+$: << File.expand_path('../../lib', __FILE__)
+
+require 'rubygems'
+require 'travis'
+
+name = ARGV.first || File.basename(File.expand_path('../..', __FILE__))
+url = 'http://github.com/svenfuchs/i18n'
+
+Travis.setup(name, url)
