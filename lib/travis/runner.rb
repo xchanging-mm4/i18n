@@ -1,17 +1,5 @@
-require 'bob'
+require 'travis/bob'
 require 'json'
-
-Bob::Builder.class_eval do
-  def completed(status, output)
-    [status, output] # let's return the actual result, eh?
-  end
-end
-
-Bob::SCM::Abstract.class_eval do
-  def dir_for(commit)
-    Bob.directory.join(path) # don't use separate directories per commit
-  end
-end
 
 module Travis
   class Runner

@@ -7,7 +7,8 @@ gem 'data_mapper'
 gem 'data_objects'
 gem 'do_postgres'
 
-# gems required to run the your libraries tests
+# Travis will append your library's Gemfile here if it exists. You can also
+# list any gems manually here.
 gem 'activerecord'
 gem 'activesupport'
 gem 'sqlite3-ruby'
