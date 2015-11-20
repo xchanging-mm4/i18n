@@ -8,21 +8,10 @@ module I18n
   class ExceptionHandler
     include Module.new {
       def call(exception, locale, key, options)
-        if exception.is_a?(MissingTranslation)
-          #
-          # TODO: this block is to be replaced by `exception.message` when
-          # rescue_format is removed
-          if options[:rescue_format] == :html
-            if !defined?(@rescue_format_deprecation)
-              $stderr.puts "[DEPRECATED] I18n's :recue_format option will be removed from a future release. All exception messages will be plain text. If you need the exception handler to return an html format please set or pass a custom exception handler."
-              @rescue_format_deprecation = true
-            end
-            exception.html_message
-          else
-            exception.message
-          end
-
-        elsif exception.is_a?(Exception)
+        case exception
+        when MissingTranslation
+          exception.message
+        when Exception
           raise exception
         else
           throw :exception, exception
@@ -54,14 +43,9 @@ module I18n
       attr_reader :locale, :key, :options
 
       def initialize(locale, key, options = nil)
-        @key, @locale, @options = key, locale, options.dup || {}
+        options = options ? options.dup : {}
+        @key, @locale, @options = key, locale, options
         options.each { |k, v| self.options[k] = v.inspect if v.is_a?(Proc) }
-      end
-
-      def html_message
-        key  = CGI.escapeHTML titleize(keys.last)
-        path = CGI.escapeHTML keys.join('.')
-        %(<span class="translation_missing" title="translation missing: #{path}">#{key}</span>)
       end
 
       def keys
@@ -77,13 +61,6 @@ module I18n
 
       def to_exception
         MissingTranslationData.new(locale, key, options)
-      end
-
-      protected
-
-      # TODO : remove when #html_message is removed
-      def titleize(key)
-        key.to_s.gsub('_', ' ').gsub(/\b('?[a-z])/) { $1.capitalize }
       end
     end
 
